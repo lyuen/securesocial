@@ -14,7 +14,7 @@
  * limitations under the License.
  *
  */
-package securesocial.controllers
+package securesocial.controllers.registration
 
 import _root_.java.util.UUID
 import play.api.mvc.{Result, Action, Controller}
@@ -33,13 +33,14 @@ import securesocial.core.providers.Token
 import scala.Some
 import securesocial.core.IdentityId
 import scala.language.reflectiveCalls
-
+import securesocial.controllers.TemplatesPlugin
+import securesocial.controllers.ProviderController
 
 /**
  * A controller to handle user registration.
  *
  */
-object Registration extends Controller {
+object DefaultRegistration extends Controller {
 
   val providerId = UsernamePasswordProvider.UsernamePassword
   val UserNameAlreadyTaken = "securesocial.signup.userNameAlreadyTaken"
@@ -53,6 +54,7 @@ object Registration extends Controller {
   val UserName = "userName"
   val FirstName = "firstName"
   val LastName = "lastName"
+  val Active = "Active"
   val Password = "password"
   val Password1 = "password1"
   val Password2 = "password2"
@@ -153,7 +155,7 @@ object Registration extends Controller {
     else NotFound(views.html.defaultpages.notFound.render(request, None))
   }
 
-  private def createToken(email: String, isSignUp: Boolean): (String, Token) = {
+  private[registration] def createToken(email: String, isSignUp: Boolean): (String, Token) = {
     val uuid = UUID.randomUUID().toString
     val now = DateTime.now
 
@@ -208,7 +210,7 @@ object Registration extends Controller {
     else NotFound(views.html.defaultpages.notFound.render(request, None))
   }
 
-  private def executeForToken(token: String, isSignUp: Boolean, f: Token => Result): Result = {
+  private[registration] def executeForToken(token: String, isSignUp: Boolean, f: Token => Result): Result = {
     UserService.findToken(token) match {
       case Some(t) if !t.isExpired && t.isSignUp == isSignUp => {
         f(t)
@@ -241,6 +243,7 @@ object Registration extends Controller {
               info.firstName,
               info.lastName,
               "%s %s".format(info.firstName, info.lastName),
+              Active,
               Some(t.email),
               GravatarHelper.avatarFor(t.email),
               AuthenticationMethod.UserPassword,
