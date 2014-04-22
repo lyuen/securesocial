@@ -114,13 +114,18 @@ object FullRegistration extends Controller with securesocial.core.SecureSocial {
               AuthenticationMethod.UserPassword,
               passwordInfo = Some(Registry.hashers.currentHasher.hash(info.password)))
             UserService.save(user)
-            Events.fire(new SignUpEvent(user)).getOrElse(session)
+            val eventSession = Events.fire(new SignUpEvent(user)).getOrElse(session)
             val token = createToken(info.email, isSignUp = true)
             Mailer.sendVerificationEmail(info.email, token._1)
+            if ( UsernamePasswordProvider.signupSkipLogin ) {
+              ProviderController.completeAuthentication(user, eventSession).flashing(Success -> Messages(SignUpDone))
+            } else {
+              Redirect(onHandleStartSignUpGoTo).flashing(Success -> Messages(ThankYouCheckEmail), Email -> info.email)
+            }
           case Some(alreadyRegisteredUser) =>
-            Mailer.sendAlreadyRegisteredEmail(alreadyRegisteredUser)
+            Redirect(onHandleStartSignUpGoTo).flashing(Success -> Messages(EmailAlreadyTaken), Email -> info.email)
         }
-        Redirect(onHandleStartSignUpGoTo).flashing(Success -> Messages(ThankYouCheckEmail), Email -> info.email)
+
       })
   }
 

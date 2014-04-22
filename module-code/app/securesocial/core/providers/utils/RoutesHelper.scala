@@ -52,7 +52,7 @@ object RoutesHelper {
 
 
   ///
-  lazy val rr = Play.application().classloader().loadClass("securesocial.controllers.ReverseRegistration")
+  lazy val rr = Play.application().classloader().loadClass("securesocial.controllers.registration.ReverseDefaultRegistration")
   lazy val registrationMethods = rr.newInstance().asInstanceOf[{
     def handleStartResetPassword(): Call
     def handleStartSignUp(): Call
