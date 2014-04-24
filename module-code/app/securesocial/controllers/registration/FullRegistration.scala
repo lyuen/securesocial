@@ -109,6 +109,7 @@ object FullRegistration extends Controller with securesocial.core.SecureSocial {
               info.lastName,
               "%s %s".format(info.firstName, info.lastName),
               NotActive,
+              false,
               Some(info.email),
               GravatarHelper.avatarFor(info.email),
               AuthenticationMethod.UserPassword,
@@ -123,7 +124,7 @@ object FullRegistration extends Controller with securesocial.core.SecureSocial {
               Redirect(onHandleStartSignUpGoTo).flashing(Success -> Messages(ThankYouCheckEmail), Email -> info.email)
             }
           case Some(alreadyRegisteredUser) =>
-            Redirect(onHandleStartSignUpGoTo).flashing(Success -> Messages(EmailAlreadyTaken), Email -> info.email)
+            Redirect(RoutesHelper.fullSignUp().url).flashing(DefaultRegistration.Error -> Messages(EmailAlreadyTaken), Email -> info.email)
         }
 
       })
@@ -131,10 +132,12 @@ object FullRegistration extends Controller with securesocial.core.SecureSocial {
 
   def signUpVerification(token: String) = UserAwareAction { implicit request =>
     def markAsActive(user: Identity) {
-      val updated = UserService.save(SocialUser(user).copy(state = "Active"))
-      Mailer.sendWelcomeEmail(updated)
-      val eventSession = Events.fire(new SignUpEvent(updated)).getOrElse(session)
-      ProviderController.completeAuthentication(updated, eventSession).flashing(Success -> Messages(SignUpDone))
+      val updated = UserService.verifyUserEmail(SocialUser(user).copy(state = "Active"))
+      if (updated.isDefined) {
+        Mailer.sendWelcomeEmail(updated.get)
+        val eventSession = Events.fire(new SignUpEvent(updated.get)).getOrElse(session)
+        ProviderController.completeAuthentication(updated.get, eventSession).flashing(Success -> Messages(SignUpDone))
+      }
     }
     executeForToken(token, true, { t =>
       val email = t.email
@@ -143,10 +146,10 @@ object FullRegistration extends Controller with securesocial.core.SecureSocial {
       (userFromToken, request.user) match {
         case (Some(user), Some(user2)) if user.identityId == user2.identityId =>
           markAsActive(user)
-          Redirect(landingUrl)
+          Redirect(landingUrl).flashing(Success -> Messages("securesocial.email.verified"))
         case (Some(user), None) =>
           markAsActive(user)
-          Redirect(RoutesHelper.login().url)
+          Redirect(RoutesHelper.login().url).flashing(Success -> Messages("securesocial.email.verified"))
         case _ =>
           Unauthorized("Not Authorized Page")
       }

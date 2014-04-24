@@ -35,6 +35,7 @@ trait Identity {
   def lastName: String
   def fullName: String
   def state:String
+  def emailVerified:Boolean
   def email: Option[String]
   def avatarUrl: Option[String]
   def authMethod: AuthenticationMethod
@@ -46,7 +47,7 @@ trait Identity {
 /**
  * An implementation of Identity.  Used by SecureSocial to gather user information when users sign up and/or sign in.
  */
-case class SocialUser(identityId: IdentityId, firstName: String, lastName: String, fullName: String, state: String, email: Option[String],
+case class SocialUser(identityId: IdentityId, firstName: String, lastName: String, fullName: String, state: String, emailVerified: Boolean, email: Option[String],
                       avatarUrl: Option[String], authMethod: AuthenticationMethod,
                       oAuth1Info: Option[OAuth1Info] = None,
                       oAuth2Info: Option[OAuth2Info] = None,
@@ -56,7 +57,7 @@ object SocialUser {
   def apply(i: Identity): SocialUser = {
     SocialUser(
       i.identityId, i.firstName, i.lastName, i.fullName, i.state,
-      i.email, i.avatarUrl, i.authMethod, i.oAuth1Info,
+      i.emailVerified, i.email, i.avatarUrl, i.authMethod, i.oAuth1Info,
       i.oAuth2Info, i.passwordInfo
     )
   }

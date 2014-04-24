@@ -244,6 +244,7 @@ object DefaultRegistration extends Controller {
               info.lastName,
               "%s %s".format(info.firstName, info.lastName),
               Active,
+              true,
               Some(t.email),
               GravatarHelper.avatarFor(t.email),
               AuthenticationMethod.UserPassword,

@@ -97,6 +97,11 @@ trait UserService {
    *
    */
   def deleteExpiredTokens()
+
+  /**
+   * Perform user email verification action.
+   */
+  def verifyUserEmail(user: Identity): Option[Identity]
 }
 
 /**
@@ -187,6 +192,13 @@ object UserService {
   def deleteToken(token: String) {
     delegate.map( _.deleteToken(token)).getOrElse {
       notInitialized()
+    }
+  }
+
+  def verifyUserEmail(user: Identity): Option[Identity] = {
+    delegate.map( _.verifyUserEmail(user)).getOrElse {
+      notInitialized()
+      None
     }
   }
 

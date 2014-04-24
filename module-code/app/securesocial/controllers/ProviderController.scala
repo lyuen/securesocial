@@ -114,10 +114,16 @@ object ProviderController extends Controller
     val withSession = Events.fire(new LoginEvent(user)).getOrElse(session)
     Authenticator.create(user) match {
       case Right(authenticator) => {
-        Redirect(toUrl(withSession)).withSession(withSession -
+        var result = Redirect(toUrl(withSession)).withSession(withSession -
           SecureSocial.OriginalUrlKey -
           IdentityProvider.SessionId -
           OAuth1Provider.CacheKey).withCookies(authenticator.toCookie)
+
+        if (!user.emailVerified) {
+          result = result.flashing("error" -> Messages("securesocial.verificationRequired"))
+        }
+
+        result
       }
       case Left(error) => {
         // improve this

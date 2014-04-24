@@ -145,6 +145,18 @@ public abstract class BaseUserService extends securesocial.core.UserServicePlugi
     }
 
     /**
+     * Perform user email verification action.
+     *
+     * @param user the user identity
+     * @return the updated user identity
+     */
+    @Override
+    public Option<securesocial.core.Identity> verifyUserEmail(securesocial.core.Identity user) {
+        Identity verifiedIdentity = doVerifyUserEmail(user);
+        return Scala.Option(verifiedIdentity);
+    }
+
+    /**
      * Saves the Identity.  This method gets called when a user logs in.
      * This is your chance to save the user information in your backing store.
      *
@@ -210,4 +222,16 @@ public abstract class BaseUserService extends securesocial.core.UserServicePlugi
      *
      */
     public abstract void doDeleteExpiredTokens();
+
+    /**
+     * Perform user email verification action.
+     *
+     * Note: If you do not plan to use the UsernamePassword provider just provide en empty
+     * implementation
+     *
+     * @param user the user identity
+     * @return the updated user identity
+     *
+     */
+    public abstract Identity doVerifyUserEmail(Identity user);
 }

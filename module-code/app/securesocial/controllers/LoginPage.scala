@@ -23,6 +23,7 @@ import Play.current
 import providers.UsernamePasswordProvider
 import providers.utils.RoutesHelper
 import play.Logger
+import play.api.i18n.Messages
 
 
 /**
@@ -46,7 +47,11 @@ object LoginPage extends Controller
       if ( Logger.isDebugEnabled() ) {
         Logger.debug("User already logged in, skipping login page. Redirecting to %s".format(to))
       }
-      Redirect( to )
+      if (SecureSocial.currentUser.get.emailVerified) {
+        Redirect( to )
+      } else {
+        Redirect( to ).flashing("error" -> Messages("securesocial.verificationRequired"))
+      }
     } else {
       import com.typesafe.plugin._
       if ( SecureSocial.enableRefererAsOriginalUrl ) {

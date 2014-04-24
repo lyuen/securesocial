@@ -132,14 +132,13 @@ trait SecureSocial extends Controller {
       }
         result.getOrElse({
           if (Logger.isDebugEnabled) {
-            Logger.debug("[securesocial] anonymous (or non-verified) user trying to access : '%s'".format(request.uri))
+            Logger.debug("[securesocial] anonymous user trying to access : '%s'".format(request.uri))
           }
           val response = if (ajaxCall) {
             ajaxCallNotAuthenticated(request)
           } else {
-            val errorMessageKey: String = user.map(_=>"securesocial.verificationRequired").getOrElse("securesocial.loginRequired")
             Redirect(RoutesHelper.login().absoluteURL(IdentityProvider.sslEnabled))
-              .flashing("error" -> Messages(errorMessageKey))
+              .flashing("error" -> Messages("securesocial.loginRequired"))
               .withSession(session + (SecureSocial.OriginalUrlKey -> request.uri))
           }
           Future.successful(response.discardingCookies(Authenticator.discardingCookie))
