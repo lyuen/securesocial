@@ -157,6 +157,19 @@ public abstract class BaseUserService extends securesocial.core.UserServicePlugi
     }
 
     /**
+     * Find token by user email.
+     *
+     * @param email the use remail.
+     * @return a Token instance or null if no token matches the specified user email
+     */
+    @Override
+    public Option<securesocial.core.providers.Token> findTokenForUserEmail(String email) {
+        Token javaToken = doFindTokenForUserEmail(email);
+        securesocial.core.providers.Token scalaToken = javaToken != null ? javaToken.toScala() : null;
+        return Scala.Option(scalaToken);
+    }
+
+    /**
      * Saves the Identity.  This method gets called when a user logs in.
      * This is your chance to save the user information in your backing store.
      *
@@ -234,4 +247,12 @@ public abstract class BaseUserService extends securesocial.core.UserServicePlugi
      *
      */
     public abstract Identity doVerifyUserEmail(Identity user);
+
+    /**
+     * Find token by user email.
+     *
+     * @param email the use remail.
+     * @return a Token instance or null if no token matches the specified user email
+     */
+    public abstract Token doFindTokenForUserEmail(String email);
 }

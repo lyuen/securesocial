@@ -130,6 +130,22 @@ object FullRegistration extends Controller with securesocial.core.SecureSocial {
       })
   }
 
+  def handleResendEmail = Action { implicit request =>
+    if (SecureSocial.currentUser.isDefined) {
+      val user = SecureSocial.currentUser.get
+      UserService.findTokenForUserEmail(user.email.get) match {
+        case None =>
+          val newToken = createToken(user.email.get, isSignUp = true)
+          Mailer.sendVerificationEmail(user.email.get, newToken._1);
+        case Some(token) =>
+          Mailer.sendVerificationEmail(user.email.get, token.uuid);
+      }
+      Redirect(landingUrl).flashing(Success -> Messages("securesocial.email.sent"));
+    } else {
+      Unauthorized("Not Authorized Page")
+    }
+  }
+
   def signUpVerification(token: String) = UserAwareAction { implicit request =>
     def markAsActive(user: Identity) {
       val updated = UserService.verifyUserEmail(SocialUser(user).copy(state = "Active"))

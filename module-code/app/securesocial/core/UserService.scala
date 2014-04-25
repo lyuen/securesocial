@@ -100,8 +100,19 @@ trait UserService {
 
   /**
    * Perform user email verification action.
+   *
+   * @param user the user identity
+   * @return the Option with user identity
    */
   def verifyUserEmail(user: Identity): Option[Identity]
+
+  /**
+   * Gets the token by user email.
+   *
+   * @param userEmail the user email.
+   * @return the Option with user token.
+   */
+  def findTokenForUserEmail(userEmail: String): Option[Token]
 }
 
 /**
@@ -197,6 +208,13 @@ object UserService {
 
   def verifyUserEmail(user: Identity): Option[Identity] = {
     delegate.map( _.verifyUserEmail(user)).getOrElse {
+      notInitialized()
+      None
+    }
+  }
+
+  def findTokenForUserEmail(userEmail: String): Option[Token] = {
+    delegate.map(_.findTokenForUserEmail(userEmail)).getOrElse {
       notInitialized()
       None
     }
