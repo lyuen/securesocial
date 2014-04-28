@@ -37,6 +37,7 @@ object ProviderController extends Controller
    * the session.
    */
   val onLoginGoTo = "securesocial.onLoginGoTo"
+  val verificationRequired = "securesocial.email.verificationRequired"
 
   /**
    * The root path
@@ -120,7 +121,7 @@ object ProviderController extends Controller
           OAuth1Provider.CacheKey).withCookies(authenticator.toCookie)
 
         if (!user.emailVerified) {
-          result = result.flashing("error" -> Messages("securesocial.verificationRequired"))
+          result = result.flashing("error" -> Messages(verificationRequired, RoutesHelper.handleResendEmail().url))
         }
 
         result

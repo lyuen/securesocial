@@ -35,6 +35,7 @@ object LoginPage extends Controller
    * The property that specifies the page the user is redirected to after logging out.
    */
   val onLogoutGoTo = "securesocial.onLogoutGoTo"
+  val verificationRequired = "securesocial.email.verificationRequired"
 
   /**
    * Renders the login page
@@ -50,7 +51,7 @@ object LoginPage extends Controller
       if (SecureSocial.currentUser.get.emailVerified) {
         Redirect( to )
       } else {
-        Redirect( to ).flashing("error" -> Messages("securesocial.verificationRequired"))
+        Redirect( to ).flashing("error" -> Messages(verificationRequired, RoutesHelper.handleResendEmail().url))
       }
     } else {
       import com.typesafe.plugin._
